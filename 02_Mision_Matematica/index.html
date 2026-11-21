@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="es">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Misión matemática · Misión WIE Chincha</title>
-    <link rel="stylesheet" href="estilos.css">
+    <link rel="stylesheet" href="estilos.css" />
     <script src="juego.js" defer></script>
   </head>
   <body>
@@ -14,37 +14,88 @@
         <a href="../index.html">← Los dos proyectos</a>
       </header>
 
-      <h1>Misión <span>matemática.</span></h1>
-      <p>
-        Resuelve la operación y activa el portal correcto. ¡Cada respuesta
-        es una nueva oportunidad para aprender!
-      </p>
+      <div class="heading">
+        <span class="badge">MISIÓN 02 · RUTA DE PORTALES</span>
+        <h1>Misión <span>matemática.</span></h1>
+        <p>
+          <span id="totalPortals">8</span> portales para llegar al destino.
+          Cada acierto suma <span id="pointValue">10</span> puntos.
+          Juega a tu ritmo o activa el modo turbo.
+        </p>
+      </div>
 
-      <div class="grid">
-        <section class="card" aria-label="Retos matemáticos">
+      <div class="layout">
+        <section class="game-panel" aria-label="Juego de portales matemáticos">
           <div class="stats">
-            <span id="progress">Reto 1 / 8</span>
-            <span id="points">0 puntos</span>
+            <span id="progress">Portal 1 / 8</span>
+            <span>Puntos: <b id="points">0</b></span>
+            <span id="streak">🔥 Racha 0</span>
           </div>
-          <div class="big" id="question"></div>
-          <div class="choices" id="choices"></div>
-          <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
-          <div class="row">
-            <button class="primary" id="next" type="button" disabled>
-              Siguiente reto →
+
+          <div class="route-heading">
+            <span>RUTA DE PORTALES</span>
+            <span id="routeCount">0 / 8</span>
+          </div>
+          <div
+            id="route"
+            class="route"
+            aria-label="Progreso de la misión"
+          ></div>
+
+          <div id="scene" class="scene">
+            <div class="planet planet-one" aria-hidden="true"></div>
+            <div class="planet planet-two" aria-hidden="true"></div>
+            <div class="explorer" aria-hidden="true">🤖</div>
+            <div class="portal-ring" aria-hidden="true"></div>
+            <span id="missionLabel" class="mission-label">PORTAL 01</span>
+            <h2 id="question"></h2>
+            <p id="scenePrompt">¿Qué portal tiene la respuesta correcta?</p>
+            <div id="burst" class="burst" aria-hidden="true"></div>
+          </div>
+
+          <div id="timerWrap" class="timer-wrap" hidden>
+            <span>TIEMPO TURBO</span>
+            <div class="timer-track">
+              <div id="timerBar" class="timer-bar"></div>
+            </div>
+            <b id="timerText">12 s</b>
+          </div>
+
+          <p id="choiceHeading" class="choice-heading">ELIGE UN PORTAL</p>
+          <div
+            id="choices"
+            class="choices"
+            role="group"
+            aria-label="Portales de respuesta"
+          ></div>
+          <p id="shortcuts" class="shortcuts">
+            También puedes pulsar 1, 2, 3 o 4.
+          </p>
+          <div
+            id="feedback"
+            class="feedback"
+            role="status"
+            aria-live="polite"
+          ></div>
+
+          <div class="actions">
+            <button id="next" class="primary" type="button" disabled>
+              Siguiente portal →
             </button>
-            <button id="reset" type="button">Reiniciar</button>
+            <button id="reset" type="button">Reiniciar misión</button>
           </div>
         </section>
 
-        <aside class="card">
+        <aside class="creator-panel">
           <span class="badge">MODO CREADOR</span>
           <h2>Diseña tus retos</h2>
-          <label for="level">Dificultad</label>
+          <p>Cambia una regla, juega otra vez y compara el resultado.</p>
+
+          <label for="level">Números hasta</label>
           <select id="level">
-            <option value="10">Inicial · hasta 10</option>
-            <option value="20" selected>Explorador · hasta 20</option>
-            <option value="50">Experto · hasta 50</option>
+            <option value="10">10 · Explorador</option>
+            <option value="20" selected>20 · Aventurero</option>
+            <option value="50">50 · Experto</option>
           </select>
 
           <label for="operation">Operaciones</label>
@@ -56,10 +107,19 @@
           </select>
 
           <label for="accent">Color de los portales</label>
-          <input id="accent" type="color" value="#263658">
-          <p>
-            Cambiar las reglas reinicia la partida. No hay límite de tiempo:
-            piensa, prueba y aprende.
+          <input id="accent" type="color" value="#263658" />
+
+          <label class="turbo-toggle" for="turbo">
+            <span>
+              <b>Modo turbo</b>
+              <small>Opcional: 12 segundos por portal.</small>
+            </span>
+            <input id="turbo" type="checkbox" />
+          </label>
+
+          <p class="creator-note">
+            En el modo normal puedes pensar sin límite de tiempo. Las opciones
+            del panel cambian la partida, pero no guardan cambios en juego.js.
           </p>
           <code id="code"></code>
         </aside>

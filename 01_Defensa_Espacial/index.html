@@ -31,8 +31,8 @@
       <h1>Defensa <span>espacial.</span></h1>
 
       <p class="intro">
-        Pilota la nave, dispara y rompe los asteroides antes de que te alcancen.
-        Después cambia las reglas y prueba tu propia versión.
+        Pilota la nave, rompe asteroides, derriba aliens y prepárate para el
+        mini jefe final. Después cambia las reglas y prueba tu propia versión.
       </p>
 
       <div class="layout">
@@ -46,16 +46,35 @@
             <span id="lives" aria-label="Vidas"> ♥ ♥ ♥ </span>
           </div>
 
-          <!-- JavaScript dibuja aquí la nave, los disparos y los asteroides -->
+          <!-- JavaScript dibuja la nave, los enemigos y los disparos -->
           <canvas
             id="board"
             width="760"
             height="440"
             tabindex="0"
-            aria-label="Nave espacial que dispara a asteroides"
+            aria-label="Nave espacial que dispara a asteroides y aliens"
           >
             Tu navegador necesita soporte para canvas.
           </canvas>
+
+          <div class="mission-status" id="missionStatus" role="status">
+            ASTEROIDES + ALIENS
+          </div>
+
+          <div
+            class="boss-hud hidden"
+            id="bossHud"
+            role="progressbar"
+            aria-label="Vida del mini jefe"
+            aria-valuemin="0"
+            aria-valuemax="9"
+            aria-valuenow="9"
+          >
+            <span>👾 MINI JEFE</span>
+            <div class="boss-health-track">
+              <div class="boss-health" id="bossHealth"></div>
+            </div>
+          </div>
 
           <!-- Mensaje de inicio, pausa y final -->
           <div class="overlay" id="overlay">
@@ -65,8 +84,8 @@
               <h2 id="message">¡Tu misión empieza aquí!</h2>
 
               <p id="description">
-                Muévete con ← → o A / D. Dispara con la barra espaciadora y
-                rompe todos los asteroides que puedas en 45 segundos.
+                Muévete con ← → o A / D. Dispara con espacio o el botón, derriba
+                aliens y vence al mini jefe antes de que acabe el tiempo.
               </p>
 
               <button class="primary" id="start" type="button">
@@ -141,7 +160,7 @@
           </div>
 
           <div>
-            <label for="difficulty"> 03 · Dificultad de los asteroides </label>
+            <label for="difficulty"> 03 · Dificultad de los enemigos </label>
 
             <select id="difficulty">
               <option value="easy">Explorador · fácil</option>
@@ -205,8 +224,8 @@
     </main>
 
     <footer>
-      WIE UTP · Misión WIE Chincha · Funciona sin internet · Cada asteroide
-      destruido suma 10 puntos.
+      WIE UTP · Misión WIE Chincha · Funciona sin internet · Asteroides +10 ·
+      Aliens +20 · Mini jefe +150.
     </footer>
   </body>
 </html>

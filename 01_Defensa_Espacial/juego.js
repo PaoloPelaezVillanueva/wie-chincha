@@ -5,7 +5,7 @@
    disparosPorSegundo: frecuencia del láser, de 2 a 8
    dificultad: "easy", "normal" o "hard"
    fondo: color del universo
-   puntosPorAsteroide: puntos por cada roca destruida */
+   puntosPorAsteroide y puntosPorAlien: puntos por enemigo */
 const CONFIG = {
   velocidad: 6,
   disparosPorSegundo: 5,
@@ -13,18 +13,42 @@ const CONFIG = {
   fondo: "#111b3b",
   duracion: 45,
   puntosPorAsteroide: 10,
+  puntosPorAlien: 20,
+  puntosPorJefe: 150,
 };
 
 const DIFICULTADES = {
-  easy: { intervalo: 1.05, velocidad: 105 },
-  normal: { intervalo: 0.72, velocidad: 155 },
-  hard: { intervalo: 0.48, velocidad: 215 },
+  easy: {
+    intervalo: 1.05,
+    velocidad: 105,
+    intervaloAlien: 2.4,
+    velocidadAlien: 75,
+    vidaJefe: 7,
+    disparoJefe: 2.4,
+  },
+  normal: {
+    intervalo: 0.72,
+    velocidad: 155,
+    intervaloAlien: 1.8,
+    velocidadAlien: 95,
+    vidaJefe: 9,
+    disparoJefe: 1.9,
+  },
+  hard: {
+    intervalo: 0.48,
+    velocidad: 215,
+    intervaloAlien: 1.35,
+    velocidadAlien: 115,
+    vidaJefe: 11,
+    disparoJefe: 1.5,
+  },
 };
 
 const obtenerElemento = (id) => document.getElementById(id);
 const lienzo = obtenerElemento("board");
 const contexto = lienzo.getContext("2d");
 const Y_NAVE = 385;
+const SEGUNDOS_FINALES = 13;
 const teclasPresionadas = new Set();
 
 let partidaActiva = false;
@@ -34,14 +58,20 @@ let vidas = 3;
 let tiempoRestante = CONFIG.duracion;
 let posicionNave = lienzo.width / 2;
 let asteroides = [];
+let aliens = [];
 let disparos = [];
+let disparosEnemigos = [];
 let particulas = [];
 let tiempoHastaAsteroide = 0;
+let tiempoHastaAlien = 0;
 let tiempoHastaDisparo = 0;
 let tiempoDeProteccion = 0;
 let tiempoAnterior = 0;
 let disparoBoton = false;
 let disparoLienzo = false;
+let miniJefe = null;
+let jefeAparecio = false;
+let sacudida = 0;
 
 const estrellasDelFondo = Array.from({ length: 75 }, () => ({
   x: Math.random() * lienzo.width,
@@ -63,6 +93,7 @@ function actualizarCodigoVisible() {
     'dificultad: "' + CONFIG.dificultad + '"',
     'fondo: "' + CONFIG.fondo + '"',
     "puntosPorAsteroide: " + CONFIG.puntosPorAsteroide,
+    "puntosPorAlien: " + CONFIG.puntosPorAlien,
   ].join("\n");
 
   document.querySelectorAll(".swatch").forEach((boton) => {
@@ -119,7 +150,7 @@ function iniciarPartida() {
     enPausa = false;
     obtenerElemento("pause").textContent = "Ⅱ";
     ocultarMensaje();
-    lienzo.focus({ preventScroll: true });
+    obtenerElemento("start").blur();
     return;
   }
 
@@ -128,19 +159,29 @@ function iniciarPartida() {
   tiempoRestante = CONFIG.duracion;
   posicionNave = lienzo.width / 2;
   asteroides = [];
+  aliens = [];
   disparos = [];
+  disparosEnemigos = [];
   particulas = [];
   tiempoHastaAsteroide = 0.5;
+  tiempoHastaAlien = 1.2;
   tiempoHastaDisparo = 0;
   tiempoDeProteccion = 0;
+  miniJefe = null;
+  jefeAparecio = false;
+  sacudida = 0;
   disparoBoton = false;
   disparoLienzo = false;
   teclasPresionadas.clear();
   partidaActiva = true;
+  obtenerElemento("symbol").textContent = "🚀";
+  obtenerElemento("missionStatus").textContent = "ASTEROIDES + ALIENS";
+  obtenerElemento("bossHud").classList.add("hidden");
+  document.querySelector(".game").classList.remove("boss-phase");
 
   actualizarMarcadores();
   ocultarMensaje();
-  lienzo.focus({ preventScroll: true });
+  obtenerElemento("start").blur();
 }
 
 function alternarPausa() {
@@ -160,26 +201,41 @@ function alternarPausa() {
     );
   } else {
     ocultarMensaje();
-    lienzo.focus({ preventScroll: true });
+    obtenerElemento("start").blur();
   }
 }
 
-function terminarPartida() {
+function terminarPartida(resultado) {
   partidaActiva = false;
   enPausa = false;
   teclasPresionadas.clear();
   disparoBoton = false;
   disparoLienzo = false;
   obtenerElemento("pause").textContent = "Ⅱ";
-  obtenerElemento("symbol").textContent = vidas > 0 ? "🏆" : "🚀";
+  obtenerElemento("bossHud").classList.add("hidden");
+  document.querySelector(".game").classList.remove("boss-phase");
 
-  mostrarMensaje(
-    vidas > 0 ? "¡Misión completada!" : "¡Volvamos a intentarlo!",
-    "Destruiste asteroides y conseguiste " +
-      puntuacion +
-      " puntos. Cambia una variable y prueba otra estrategia.",
-    "Volver a jugar →",
-  );
+  if (resultado === "victoria") {
+    obtenerElemento("symbol").textContent = "🏆";
+    obtenerElemento("missionStatus").textContent = "MISIÓN CUMPLIDA";
+    mostrarMensaje(
+      "¡Mini jefe derrotado!",
+      "Salvaste la misión y conseguiste " +
+        puntuacion +
+        " puntos. ¡Prueba otra dificultad!",
+      "Volver a jugar →",
+    );
+  } else {
+    obtenerElemento("symbol").textContent = "🚀";
+    obtenerElemento("missionStatus").textContent = "INTÉNTALO DE NUEVO";
+    mostrarMensaje(
+      resultado === "vidas" ? "¡La nave necesita ayuda!" : "¡El jefe escapó!",
+      "Conseguiste " +
+        puntuacion +
+        " puntos. Esquiva los disparos y vuelve a intentarlo.",
+      "Volver a jugar →",
+    );
+  }
 }
 
 obtenerElemento("start").addEventListener("click", iniciarPartida);
@@ -330,6 +386,192 @@ function crearParticulas(x, y, color) {
   }
 }
 
+function crearAlien() {
+  const dificultad = DIFICULTADES[CONFIG.dificultad];
+  const baseX = 55 + Math.random() * (lienzo.width - 110);
+  aliens.push({
+    x: baseX,
+    baseX,
+    y: -32,
+    edad: 0,
+    fase: Math.random() * Math.PI * 2,
+    velocidad: dificultad.velocidadAlien,
+    tiempoDisparo: 1.5 + Math.random() * 1.3,
+    color: Math.random() < 0.5 ? "#6af0d2" : "#b89bff",
+  });
+}
+
+function crearDisparoEnemigo(x, y, velocidad, angulo, color) {
+  disparosEnemigos.push({
+    x,
+    y,
+    vx: Math.sin(angulo) * velocidad,
+    vy: Math.cos(angulo) * velocidad,
+    color,
+  });
+}
+
+function recibirImpacto(x, y) {
+  crearParticulas(x, y, "#ff8296");
+  sacudida = 8;
+  if (tiempoDeProteccion <= 0) {
+    vidas = Math.max(0, vidas - 1);
+    tiempoDeProteccion = 1.2;
+  }
+}
+
+function actualizarAliens(deltaTiempo) {
+  tiempoHastaAlien -= deltaTiempo;
+  if (tiempoHastaAlien <= 0) {
+    crearAlien();
+    tiempoHastaAlien += DIFICULTADES[CONFIG.dificultad].intervaloAlien;
+  }
+
+  for (let indice = aliens.length - 1; indice >= 0; indice--) {
+    const alien = aliens[indice];
+    alien.edad += deltaTiempo;
+    alien.y += alien.velocidad * deltaTiempo;
+    alien.x = Math.max(
+      30,
+      Math.min(
+        lienzo.width - 30,
+        alien.baseX + Math.sin(alien.edad * 2.8 + alien.fase) * 42,
+      ),
+    );
+
+    if (alien.y > 50 && alien.y < 270) {
+      alien.tiempoDisparo -= deltaTiempo;
+      if (alien.tiempoDisparo <= 0) {
+        const angulo = Math.atan2(posicionNave - alien.x, Y_NAVE - alien.y);
+        crearDisparoEnemigo(alien.x, alien.y + 18, 205, angulo, "#8af4d7");
+        alien.tiempoDisparo = 2.7 + Math.random() * 0.9;
+      }
+    }
+
+    let destruido = false;
+    for (let bala = disparos.length - 1; bala >= 0; bala--) {
+      if (
+        Math.hypot(disparos[bala].x - alien.x, disparos[bala].y - alien.y) < 24
+      ) {
+        disparos.splice(bala, 1);
+        aliens.splice(indice, 1);
+        puntuacion += CONFIG.puntosPorAlien;
+        crearParticulas(alien.x, alien.y, alien.color);
+        destruido = true;
+        break;
+      }
+    }
+    if (destruido) continue;
+
+    if (Math.hypot(alien.x - posicionNave, alien.y - Y_NAVE) < 42) {
+      aliens.splice(indice, 1);
+      recibirImpacto(alien.x, alien.y);
+    } else if (alien.y > lienzo.height + 30) {
+      aliens.splice(indice, 1);
+    }
+  }
+}
+
+function iniciarMiniJefe() {
+  jefeAparecio = true;
+  asteroides = [];
+  aliens = [];
+  disparosEnemigos = [];
+  const vidaMaxima = DIFICULTADES[CONFIG.dificultad].vidaJefe;
+  miniJefe = {
+    x: lienzo.width / 2,
+    y: -60,
+    edad: 0,
+    vida: vidaMaxima,
+    vidaMaxima,
+    tiempoDisparo: 1.5,
+    brillo: 0,
+  };
+  obtenerElemento("missionStatus").textContent = "¡MINI JEFE FINAL!";
+  const barra = obtenerElemento("bossHud");
+  barra.classList.remove("hidden");
+  barra.setAttribute("aria-valuemax", String(vidaMaxima));
+  barra.setAttribute("aria-valuenow", String(vidaMaxima));
+  obtenerElemento("bossHealth").style.width = "100%";
+  document.querySelector(".game").classList.add("boss-phase");
+}
+
+function actualizarMiniJefe(deltaTiempo) {
+  if (!miniJefe) return;
+  miniJefe.edad += deltaTiempo;
+  miniJefe.y = Math.min(160, miniJefe.y + 180 * deltaTiempo);
+  miniJefe.x = lienzo.width / 2 + Math.sin(miniJefe.edad * 1.45) * 190;
+  miniJefe.brillo = Math.max(0, miniJefe.brillo - deltaTiempo);
+
+  for (let indice = disparos.length - 1; indice >= 0; indice--) {
+    const bala = disparos[indice];
+    if (
+      Math.abs(bala.x - miniJefe.x) < 78 &&
+      Math.abs(bala.y - miniJefe.y) < 40
+    ) {
+      disparos.splice(indice, 1);
+      miniJefe.vida--;
+      miniJefe.brillo = 0.15;
+      sacudida = 4;
+      crearParticulas(bala.x, bala.y, "#ffaad9");
+      obtenerElemento("bossHud").setAttribute(
+        "aria-valuenow",
+        String(Math.max(0, miniJefe.vida)),
+      );
+      obtenerElemento("bossHealth").style.width =
+        Math.max(0, (miniJefe.vida / miniJefe.vidaMaxima) * 100) + "%";
+
+      if (miniJefe.vida <= 0) {
+        for (let parte = 0; parte < 5; parte++) {
+          crearParticulas(
+            miniJefe.x + (Math.random() - 0.5) * 110,
+            miniJefe.y + (Math.random() - 0.5) * 40,
+            parte % 2 ? "#fff19c" : "#ff83c1",
+          );
+        }
+        puntuacion += CONFIG.puntosPorJefe;
+        miniJefe = null;
+        terminarPartida("victoria");
+        return;
+      }
+    }
+  }
+
+  if (miniJefe.y < 140) return;
+  miniJefe.tiempoDisparo -= deltaTiempo;
+  if (miniJefe.tiempoDisparo <= 0) {
+    const angulo = Math.atan2(posicionNave - miniJefe.x, Y_NAVE - miniJefe.y);
+    for (const apertura of [-0.22, 0, 0.22]) {
+      crearDisparoEnemigo(
+        miniJefe.x,
+        miniJefe.y + 27,
+        230,
+        angulo + apertura,
+        "#ff83c1",
+      );
+    }
+    miniJefe.tiempoDisparo = DIFICULTADES[CONFIG.dificultad].disparoJefe;
+  }
+}
+
+function actualizarDisparosEnemigos(deltaTiempo) {
+  for (let indice = disparosEnemigos.length - 1; indice >= 0; indice--) {
+    const bala = disparosEnemigos[indice];
+    bala.x += bala.vx * deltaTiempo;
+    bala.y += bala.vy * deltaTiempo;
+    if (Math.hypot(bala.x - posicionNave, bala.y - Y_NAVE) < 22) {
+      disparosEnemigos.splice(indice, 1);
+      recibirImpacto(bala.x, bala.y);
+    } else if (
+      bala.y > lienzo.height + 20 ||
+      bala.x < -20 ||
+      bala.x > lienzo.width + 20
+    ) {
+      disparosEnemigos.splice(indice, 1);
+    }
+  }
+}
+
 function actualizarAsteroides(deltaTiempo) {
   tiempoHastaAsteroide -= deltaTiempo;
   if (tiempoHastaAsteroide <= 0) {
@@ -361,11 +603,7 @@ function actualizarAsteroides(deltaTiempo) {
 
     if (Math.hypot(roca.x - posicionNave, roca.y - Y_NAVE) < roca.radio + 20) {
       asteroides.splice(indice, 1);
-      crearParticulas(roca.x, roca.y, "#ff8296");
-      if (tiempoDeProteccion <= 0) {
-        vidas--;
-        tiempoDeProteccion = 1.2;
-      }
+      recibirImpacto(roca.x, roca.y);
     } else if (roca.y > lienzo.height + roca.radio) {
       asteroides.splice(indice, 1);
     }
@@ -408,11 +646,24 @@ function dibujarPoligono(puntos, relleno, borde = "#ffffff") {
   contexto.stroke();
 }
 
-function dibujarFondo() {
-  contexto.fillStyle = CONFIG.fondo;
+function dibujarFondo(tiempoActual) {
+  const fondo = contexto.createLinearGradient(0, 0, 0, lienzo.height);
+  fondo.addColorStop(0, CONFIG.fondo);
+  fondo.addColorStop(1, "#070c1f");
+  contexto.fillStyle = fondo;
   contexto.fillRect(0, 0, lienzo.width, lienzo.height);
+
+  const nebulosa = contexto.createRadialGradient(610, 95, 10, 610, 95, 240);
+  nebulosa.addColorStop(0, miniJefe ? "#f04c8e33" : "#7062cf2b");
+  nebulosa.addColorStop(1, "#00000000");
+  contexto.fillStyle = nebulosa;
+  contexto.fillRect(360, 0, 400, 340);
+
   estrellasDelFondo.forEach((estrella) => {
-    contexto.globalAlpha = 0.35 + estrella.radio / 3;
+    contexto.globalAlpha =
+      0.3 +
+      estrella.radio / 4 +
+      Math.sin(tiempoActual / 550 + estrella.x) * 0.12;
     contexto.fillStyle = "#dce6ff";
     contexto.beginPath();
     contexto.arc(estrella.x, estrella.y, estrella.radio, 0, Math.PI * 2);
@@ -522,6 +773,137 @@ function dibujarAsteroide(roca) {
   contexto.restore();
 }
 
+function dibujarAlien(alien) {
+  contexto.save();
+  contexto.translate(alien.x, alien.y);
+  contexto.rotate(Math.sin(alien.edad * 5) * 0.1);
+  contexto.shadowColor = alien.color;
+  contexto.shadowBlur = 18;
+
+  contexto.strokeStyle = alien.color;
+  contexto.lineWidth = 3;
+  for (const x of [-15, 0, 15]) {
+    contexto.beginPath();
+    contexto.moveTo(x, 8);
+    contexto.quadraticCurveTo(x * 1.3, 25, x * 1.2, 20);
+    contexto.stroke();
+  }
+
+  contexto.fillStyle = "#362b66";
+  contexto.beginPath();
+  contexto.ellipse(0, 0, 24, 16, 0, 0, Math.PI * 2);
+  contexto.fill();
+  contexto.strokeStyle = alien.color;
+  contexto.lineWidth = 2;
+  contexto.stroke();
+
+  contexto.fillStyle = alien.color;
+  contexto.beginPath();
+  contexto.ellipse(0, -5, 17, 12, 0, Math.PI, Math.PI * 2);
+  contexto.fill();
+
+  contexto.fillStyle = "#111f38";
+  for (const x of [-8, 8]) {
+    contexto.beginPath();
+    contexto.ellipse(x, 0, 4, 6, 0, 0, Math.PI * 2);
+    contexto.fill();
+  }
+  contexto.fillStyle = "#fff1a6";
+  for (const x of [-8, 8]) {
+    contexto.beginPath();
+    contexto.arc(x - 1, -2, 1.5, 0, Math.PI * 2);
+    contexto.fill();
+  }
+  contexto.restore();
+}
+
+function dibujarMiniJefe(tiempoActual) {
+  if (!miniJefe) return;
+  contexto.save();
+  contexto.translate(miniJefe.x, miniJefe.y);
+  contexto.translate(0, Math.sin(tiempoActual / 260) * 3);
+
+  const aura = contexto.createRadialGradient(0, 0, 8, 0, 0, 112);
+  aura.addColorStop(0, "#ff8cc477");
+  aura.addColorStop(1, "#ff8cc400");
+  contexto.fillStyle = aura;
+  contexto.beginPath();
+  contexto.arc(0, 0, 112, 0, Math.PI * 2);
+  contexto.fill();
+
+  contexto.shadowColor = "#ff67b5";
+  contexto.shadowBlur = 22;
+  contexto.fillStyle = "#663281";
+  contexto.beginPath();
+  contexto.ellipse(0, 8, 83, 27, 0, 0, Math.PI * 2);
+  contexto.fill();
+  contexto.strokeStyle = "#ffb6df";
+  contexto.lineWidth = 3;
+  contexto.stroke();
+
+  contexto.fillStyle = "#c16bc8";
+  contexto.beginPath();
+  contexto.ellipse(0, -16, 56, 39, 0, Math.PI, Math.PI * 2);
+  contexto.fill();
+  contexto.stroke();
+
+  contexto.fillStyle = "#2b214e";
+  contexto.beginPath();
+  contexto.ellipse(0, -7, 43, 20, 0, 0, Math.PI * 2);
+  contexto.fill();
+
+  contexto.fillStyle = "#fff0a5";
+  for (const x of [-25, 0, 25]) {
+    contexto.beginPath();
+    contexto.ellipse(x, -9, 7, 10, 0, 0, Math.PI * 2);
+    contexto.fill();
+  }
+  contexto.fillStyle = "#f7a9dd";
+  for (const x of [-58, -35, 35, 58]) {
+    contexto.beginPath();
+    contexto.arc(x, 12, 4, 0, Math.PI * 2);
+    contexto.fill();
+  }
+
+  contexto.strokeStyle = "#ffb6df";
+  contexto.lineWidth = 4;
+  for (const x of [-48, 48]) {
+    contexto.beginPath();
+    contexto.moveTo(x, 20);
+    contexto.quadraticCurveTo(x * 1.3, 47, x * 1.1, 42);
+    contexto.stroke();
+  }
+
+  if (miniJefe.brillo > 0) {
+    contexto.globalAlpha = miniJefe.brillo * 3;
+    contexto.fillStyle = "#ffffff";
+    contexto.beginPath();
+    contexto.ellipse(0, 2, 82, 29, 0, 0, Math.PI * 2);
+    contexto.fill();
+  }
+  contexto.restore();
+}
+
+function dibujarDisparosEnemigos() {
+  contexto.save();
+  contexto.lineCap = "round";
+  contexto.lineWidth = 3;
+  disparosEnemigos.forEach((bala) => {
+    contexto.shadowColor = bala.color;
+    contexto.shadowBlur = 15;
+    contexto.strokeStyle = bala.color;
+    contexto.beginPath();
+    contexto.moveTo(bala.x - bala.vx * 0.04, bala.y - bala.vy * 0.04);
+    contexto.lineTo(bala.x, bala.y);
+    contexto.stroke();
+    contexto.fillStyle = "#fff1ef";
+    contexto.beginPath();
+    contexto.arc(bala.x, bala.y, 4, 0, Math.PI * 2);
+    contexto.fill();
+  });
+  contexto.restore();
+}
+
 function dibujarDisparos() {
   contexto.save();
   contexto.shadowColor = "#77f6ff";
@@ -551,27 +933,50 @@ function dibujarFotograma(tiempoActual) {
   if (partidaActiva && !enPausa) {
     tiempoRestante = Math.max(0, tiempoRestante - deltaTiempo);
     tiempoDeProteccion = Math.max(0, tiempoDeProteccion - deltaTiempo);
+    sacudida = Math.max(0, sacudida - deltaTiempo * 22);
     moverNave(deltaTiempo);
     actualizarDisparos(deltaTiempo);
-    actualizarAsteroides(deltaTiempo);
+
+    if (!jefeAparecio && tiempoRestante <= SEGUNDOS_FINALES) {
+      iniciarMiniJefe();
+    }
+    if (jefeAparecio) {
+      actualizarMiniJefe(deltaTiempo);
+    } else {
+      actualizarAsteroides(deltaTiempo);
+      actualizarAliens(deltaTiempo);
+    }
+    if (partidaActiva) actualizarDisparosEnemigos(deltaTiempo);
     actualizarParticulas(deltaTiempo);
     actualizarMarcadores();
-    if (vidas <= 0 || tiempoRestante <= 0) terminarPartida();
+    if (partidaActiva && vidas <= 0) terminarPartida("vidas");
+    else if (partidaActiva && tiempoRestante <= 0) terminarPartida("tiempo");
   }
 
-  dibujarFondo();
+  dibujarFondo(tiempoActual);
+  contexto.save();
+  if (sacudida > 0) {
+    contexto.translate(
+      (Math.random() - 0.5) * sacudida,
+      (Math.random() - 0.5) * sacudida,
+    );
+  }
   asteroides.forEach(dibujarAsteroide);
+  aliens.forEach(dibujarAlien);
+  dibujarMiniJefe(tiempoActual);
+  dibujarDisparosEnemigos();
   dibujarDisparos();
   dibujarParticulas();
   dibujarNave(tiempoActual);
+  contexto.restore();
   requestAnimationFrame(dibujarFotograma);
 }
 
 actualizarCodigoVisible();
 actualizarMarcadores();
 obtenerElemento("description").textContent =
-  "Muévete con ← → o A / D. Dispara con espacio o con el botón y rompe " +
-  "todos los asteroides que puedas en " +
+  "Muévete con ← → o A / D. Dispara con espacio o con el botón, derriba " +
+  "aliens y derrota al mini jefe en " +
   CONFIG.duracion +
   " segundos.";
 requestAnimationFrame(dibujarFotograma);

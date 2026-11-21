@@ -1,56 +1,161 @@
 <!doctype html>
 <html lang="es">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Inicio · Misión WIE Chincha</title>
-    <link rel="stylesheet" href="estilos.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#273d89" />
+    <meta
+      name="description"
+      content="Elige una aventura: pilota una nave espacial o resuelve retos matemáticos. Juegos del taller Misión WIE Chincha."
+    />
+    <title>Elige tu aventura · Misión WIE Chincha</title>
+    <link rel="stylesheet" href="estilos.css" />
   </head>
   <body>
-    <main>
-      <header>
-        <b>✦ MISIÓN WIE CHINCHA</b>
-        <span>INGENIERÍA DE SISTEMAS E INFORMÁTICA</span>
+    <div class="page-shell">
+      <header class="site-header">
+        <a
+          class="brand"
+          href="index.html"
+          aria-label="Misión WIE Chincha, inicio"
+        >
+          <span class="brand-mark" aria-hidden="true">W</span>
+          <span>MISIÓN <strong>WIE CHINCHA</strong></span>
+        </a>
+        <span class="header-label">WIE UTP · Taller de programación</span>
       </header>
 
-      <span class="badge">TALLER + FERIA VOCACIONAL</span>
-      <h1>Misión WIE <span>Chincha.</span></h1>
-      <p>
-        Dos proyectos. Dos formas de descubrir la programación.<br>
-        Elige una misión, juega y transforma sus reglas.
-      </p>
+      <main>
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <span class="eyebrow">DOS JUEGOS · MUCHAS IDEAS</span>
+            <h1 id="hero-title">¡Elige tu <span>aventura!</span></h1>
+            <p>
+              Puedes pilotar una nave o abrir portales con matemáticas. Toca una
+              misión para empezar a jugar.
+            </p>
+            <a class="hero-link" href="#misiones"
+              >Ver las misiones <span aria-hidden="true">↓</span></a
+            >
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="hero-orbit orbit-one"></div>
+            <div class="hero-orbit orbit-two"></div>
+            <div class="hero-planet"></div>
+            <span class="hero-rocket">🚀</span>
+            <span class="hero-spark spark-one">+</span>
+            <span class="hero-spark spark-two">×</span>
+            <span class="hero-spark spark-three">?</span>
+          </div>
+        </section>
 
-      <div class="tiles">
-        <a class="card tile" href="01_Defensa_Espacial/index.html">
-          <div class="icon" aria-hidden="true">🚀</div>
-          <h2>Defensa espacial</h2>
-          <p>
-            Pilota una nave, dispara y rompe asteroides. Cambia la velocidad
-            y la dificultad.
-          </p>
-          <b class="tile-action">Entrar a la misión →</b>
-        </a>
+        <section
+          id="misiones"
+          class="missions"
+          aria-labelledby="missions-title"
+        >
+          <div class="section-heading">
+            <div>
+              <span class="section-kicker">¿QUÉ QUIERES JUGAR?</span>
+              <h2 id="missions-title">Escoge una misión</h2>
+            </div>
+            <p>Entra, prueba y vuelve cuando quieras.</p>
+          </div>
 
-        <a class="card tile" href="02_Mision_Matematica/index.html">
-          <div class="icon" aria-hidden="true">➗</div>
-          <h2>Misión matemática</h2>
-          <p>Activa portales resolviendo sumas, restas y multiplicaciones.</p>
-          <b class="tile-action">Entrar a la misión →</b>
-        </a>
-      </div>
+          <div class="mission-grid">
+            <a
+              class="mission-card space-card"
+              href="01_Defensa_Espacial/index.html"
+            >
+              <div class="card-art space-art" aria-hidden="true">
+                <span class="art-orbit"></span
+                ><span class="space-ship">🚀</span>
+                <span class="space-rock rock-one">🪨</span
+                ><span class="space-rock rock-two">🪨</span>
+                <span class="space-alien">👾</span>
+              </div>
+              <div class="card-body">
+                <span class="mission-number">MISIÓN 01 · ACCIÓN</span>
+                <h3>Defensa espacial</h3>
+                <p>
+                  Mueve tu nave, dispara a rocas y aliens, ¡y vence al mini
+                  jefe!
+                </p>
+                <span class="card-hint"
+                  >Mueve: ← → o A / D · Dispara: espacio</span
+                >
+                <span class="play-button"
+                  >Jugar defensa espacial
+                  <span aria-hidden="true">→</span></span
+                >
+              </div>
+            </a>
 
-      <section class="card" aria-labelledby="creator-title">
-        <h2 id="creator-title">De jugador a creador</h2>
-        <p>
-          Primero juega. Luego abre juego.js en un editor, busca
-          <b>CAMBIA AQUÍ</b>, modifica un valor, guarda y recarga el juego.
-          Explica qué cambió y por qué.
-        </p>
-      </section>
+            <a
+              class="mission-card math-card"
+              href="02_Mision_Matematica/index.html"
+            >
+              <div class="card-art math-art" aria-hidden="true">
+                <span class="math-ring ring-outer"></span
+                ><span class="math-ring ring-inner"></span>
+                <span class="math-symbol symbol-plus">+</span
+                ><span class="math-symbol symbol-times">×</span>
+                <span class="math-robot">🤖</span>
+              </div>
+              <div class="card-body">
+                <span class="mission-number">MISIÓN 02 · RETOS</span>
+                <h3>Misión matemática</h3>
+                <p>
+                  Resuelve sumas, restas y multiplicaciones para abrir 8
+                  portales.
+                </p>
+                <span class="card-hint"
+                  >Elige la respuesta correcta · Sin prisa</span
+                >
+                <span class="play-button"
+                  >Jugar misión matemática
+                  <span aria-hidden="true">→</span></span
+                >
+              </div>
+            </a>
+          </div>
+        </section>
 
-      <footer>
-        WIE UTP · Ingeniería de Sistemas e Informática · Funciona sin internet
-      </footer>
-    </main>
+        <section class="next-steps" aria-labelledby="steps-title">
+          <div>
+            <span class="section-kicker">ASÍ DE FÁCIL</span>
+            <h2 id="steps-title">Juega a tu manera</h2>
+          </div>
+          <ol>
+            <li><span aria-hidden="true">👆</span><b>Elige</b> un juego.</li>
+            <li>
+              <span aria-hidden="true">🎮</span><b>Juega</b> y prueba ideas.
+            </li>
+            <li>
+              <span aria-hidden="true">💡</span><b>Crea</b> tu propia versión.
+            </li>
+          </ol>
+        </section>
+
+        <details class="creator-details">
+          <summary>
+            Para crear y cambiar las reglas <span aria-hidden="true">＋</span>
+          </summary>
+          <div class="creator-content">
+            <p>
+              Con tu profe o tu equipo, abre <code>juego.js</code> en un editor.
+              Busca <strong>CAMBIA AQUÍ</strong>, modifica un valor, guarda y
+              vuelve a jugar. Cuenta qué cambió.
+            </p>
+            <p>
+              También puedes probar las opciones del panel «Modo creador» dentro
+              de cada juego.
+            </p>
+          </div>
+        </details>
+      </main>
+
+      <footer>WIE UTP · Ingeniería de Sistemas e Informática · Chincha</footer>
+    </div>
   </body>
 </html>

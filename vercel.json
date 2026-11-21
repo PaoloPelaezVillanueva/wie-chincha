@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/01_Atrapa_Estrellas",
+      "destination": "/01_Defensa_Espacial/index.html",
+      "permanent": true
+    },
+    {
+      "source": "/01_Atrapa_Estrellas/:path*",
+      "destination": "/01_Defensa_Espacial/:path*",
+      "permanent": true
+    }
+  ]
+}

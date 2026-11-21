@@ -48,6 +48,17 @@ header {
   color: #aebad5;
 }
 
+.home-link {
+  color: #bba6ff;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.home-link:hover {
+  text-decoration: underline;
+}
+
 .eyebrow {
   font-size: 11px;
   letter-spacing: 2px;
@@ -171,7 +182,9 @@ button:hover {
 
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+canvas:focus-visible,
+a:focus-visible {
   outline: 3px solid #ffe198;
   outline-offset: 3px;
 }
@@ -202,6 +215,17 @@ select:focus-visible {
 .arrows button {
   padding: 8px 20px;
   touch-action: none;
+}
+
+.arrows .fire {
+  background: #b49aff;
+  border-color: #d8caff;
+  color: #17112c;
+  font-weight: 800;
+}
+
+.help-mobile {
+  display: none;
 }
 
 /* ==========================================================
@@ -370,6 +394,23 @@ footer {
 
   .help {
     flex-wrap: wrap;
+  }
+
+  .help-desktop {
+    display: none;
+  }
+
+  .help-mobile {
+    display: inline;
+  }
+
+  .arrows {
+    width: 100%;
+  }
+
+  .arrows button {
+    flex: 1;
+    padding: 12px 8px;
   }
 
   .bottom {

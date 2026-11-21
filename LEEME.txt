@@ -5,18 +5,18 @@ Descomprime toda la carpeta y abre index.html con Chrome, Edge o Firefox.
 No necesita internet, instalación ni servidor. No abras los juegos dentro del ZIP.
 
 PROYECTOS
-01_Atrapa_Estrellas/index.html: habilidad, variables, movimiento y colisiones.
+01_Defensa_Espacial/index.html: nave, disparos, asteroides, movimiento y colisiones.
 02_Mision_Matematica/index.html: operaciones, números aleatorios, condiciones y puntos.
 
 PARA MODIFICAR
-Haz una copia del proyecto. Abre su index.html en un editor de texto o VS Code.
+Haz una copia del proyecto. Abre su archivo juego.js en un editor de texto o VS Code.
 Busca CAMBIA AQUÍ. Modifica una sola propiedad de CONFIG, guarda y recarga.
 Los paneles muestran el efecto de las variables, pero no guardan los cambios en el archivo.
-Al editar CONFIG actualiza también el valor inicial del control HTML correspondiente.
+Si cambias un valor inicial de CONFIG, actualiza también el control correspondiente en index.html.
 No borres comillas, comas ni llaves. Si falla, vuelve a la copia original.
 
 RETOS PARA EL TALLER (2–3 estudiantes por equipo)
-Estrellas: cambiar velocidad de 6 a 9 y comparar; elegir personaje y dificultad.
+Defensa espacial: cambiar velocidad de 6 a 9 y comparar; probar más disparos por segundo y otra dificultad.
 Matemática: cambiar puntos de 10 a 20 o retos de 8 a 5; probar otra operación.
 Rotar roles: quien modifica, quien prueba y quien explica.
 
